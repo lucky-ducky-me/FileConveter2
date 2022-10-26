@@ -2,15 +2,24 @@ package FileConverter;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.xml.parsers.*;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.javatuples.Pair;
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
 
 import Weapon.Pistol;
 import Weapon.Rifle;
 import Weapon.WeaponData;
-import org.w3c.dom.*;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.*;
-
+/**
+ * Работа с xml.
+ */
 public class XmlWeaponWorker {
 
     /**
@@ -230,5 +239,201 @@ public class XmlWeaponWorker {
         }
 
         return resultRifles;
+    }
+
+    /**
+     * Записать данные об оружии в xml файл.
+     * @param fileLocation расположение файла.
+     * @param weaponData данные об оружии.
+     */
+    public static void writeWeaponData(String fileLocation, WeaponData weaponData) throws ParserConfigurationException, IOException {
+        var docFactory = DocumentBuilderFactory.newInstance();
+        var docBuilder = docFactory.newDocumentBuilder();
+
+        var doc = docBuilder.newDocument();
+        var rootElement = doc.createElement("Firearms");
+        doc.appendChild(rootElement);
+
+        var countries = doc.createElement("Countries");
+
+        rootElement.appendChild(countries);
+
+        var transformedWeaponData = getTransformedWeaponData(weaponData);
+
+        for (var key : transformedWeaponData.keySet()) {
+
+            var countryNode = doc.createElement(key);
+
+            var pistols = transformedWeaponData.get(key).getValue0();
+
+            var rifles = transformedWeaponData.get(key).getValue1();
+
+            writePistols(doc, countryNode, pistols);
+
+            writeRifles(doc, countryNode, rifles);
+
+            countries.appendChild(countryNode);
+        }
+
+        if (!new File(fileLocation).exists()) {
+            new File(fileLocation).createNewFile();
+        }
+
+        try (var output = new FileOutputStream(fileLocation)) {
+
+            writeXmlInFile(doc, output);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (TransformerConfigurationException e) {
+            throw new RuntimeException(e);
+        } catch (TransformerException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    /**
+     * Запись в файл "документа".
+     * @param doc "документ".
+     * @param output файловый поток.
+     */
+    private static void writeXmlInFile(Document doc, OutputStream output) throws TransformerException {
+        var transformerFactory = TransformerFactory.newInstance();
+        var transformer = transformerFactory.newTransformer();
+
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+
+        var source = new DOMSource(doc);
+        var result = new StreamResult(output);
+
+        transformer.transform(source, result);
+    }
+
+    /**
+     * Получить трансформированные для записи в xml данные об оружии.
+     * @param weaponData данные об оружии.
+     * @return трансформированные данные.
+     */
+    private static HashMap<String, Pair<ArrayList<Pistol>, ArrayList<Rifle>>> getTransformedWeaponData(WeaponData weaponData) {
+        var countries = getCountries(weaponData);
+
+        var result = new HashMap<String, Pair<ArrayList<Pistol>, ArrayList<Rifle>>>();
+
+        for (var i = 0; i < countries.size(); i++) {
+            var pistols = new ArrayList<Pistol>();
+
+            for (var j = 0; j < weaponData.getPistols().size(); j++) {
+                if (weaponData.getPistols().get(j).getCountry().equals(countries.get(i))) {
+                    pistols.add(weaponData.getPistols().get(j));
+                }
+            }
+
+            var rifles = new ArrayList<Rifle>();
+
+            for (var j = 0; j < weaponData.getRifles().size(); j++) {
+                if (weaponData.getRifles().get(j).getCountry().equals(countries.get(i))) {
+                    rifles.add(weaponData.getRifles().get(j));
+                }
+            }
+
+            result.put(countries.get(i), Pair.with(pistols, rifles));
+        }
+
+        return result;
+    }
+
+    /**
+     * Получить все страны.
+     * @param weaponData данные об оружие.
+     * @return Список стран.
+     */
+    private static ArrayList<String> getCountries(WeaponData weaponData) {
+        var countries = new ArrayList<String>();
+
+        for (var i = 0; i < weaponData.getPistols().size(); i++) {
+            var country = weaponData.getPistols().get(i).getCountry();
+
+            if (!countries.contains(country)) {
+                countries.add(country);
+            }
+        }
+
+        for (var i = 0; i < weaponData.getRifles().size(); i++) {
+            var country = weaponData.getRifles().get(i).getCountry();
+
+            if (!countries.contains(country)) {
+                countries.add(country);
+            }
+        }
+
+        return countries;
+    }
+
+    /**
+     * Запись пистолетов в xml узел.
+     * @param doc xml "документ".
+     * @param countryNode узел страны.
+     * @param pistols список пистолетов.
+     */
+    private static void writePistols(Document doc, Element countryNode, ArrayList<Pistol> pistols) {
+        var pistolsNode = doc.createElement("Pistols");
+
+        for (var pistol: pistols) {
+            var pistolNode = doc.createElement("Pistol");
+
+            var nameNode = doc.createElement("Name");
+
+            nameNode.setTextContent(pistol.getName());
+
+            var calibreNode = doc.createElement("Calibre");
+
+            calibreNode.setTextContent(Double.toString(pistol.getCalibre()));
+
+            var magazineNode = doc.createElement("Magazine");
+
+            magazineNode.setTextContent(Integer.toString(pistol.getMagazine()));
+
+            pistolNode.appendChild(nameNode);
+            pistolNode.appendChild(calibreNode);
+            pistolNode.appendChild(magazineNode);
+
+            pistolsNode.appendChild(pistolNode);
+        }
+
+        countryNode.appendChild(pistolsNode);
+    }
+
+    /**
+     * Запись винтовок в xml узел.
+     * @param doc xml "документ".
+     * @param countryNode узел страны.
+     * @param rifles список винтовок.
+     */
+    private static void writeRifles(Document doc, Element countryNode, ArrayList<Rifle> rifles) {
+        var riflesNode = doc.createElement("Rifles");
+
+        for (var rifle: rifles) {
+            var rifleNode = doc.createElement("Rifle");
+
+            var nameNode = doc.createElement("Name");
+
+            nameNode.setTextContent(rifle.getName());
+
+            var calibreNode = doc.createElement("Calibre");
+
+            calibreNode.setTextContent(Double.toString(rifle.getCalibre()));
+
+            var magazineNode = doc.createElement("Magazine");
+
+            magazineNode.setTextContent(Integer.toString(rifle.getMagazine()));
+
+            rifleNode.appendChild(nameNode);
+            rifleNode.appendChild(calibreNode);
+            rifleNode.appendChild(magazineNode);
+
+            riflesNode.appendChild(rifleNode);
+        }
+
+        countryNode.appendChild(riflesNode);
     }
 }
