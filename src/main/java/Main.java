@@ -28,7 +28,7 @@ public class Main {
                 FileConverterService.xmlToJson(sourceFile, destinationFile);
             }
             else if (sourceFile.endsWith(".json") && destinationFile.endsWith(".xml")) {
-                FileConverterService.jsonToXml(destinationFile, sourceFile);
+                FileConverterService.jsonToXml(sourceFile, destinationFile);
             }
             else {
                 throw new Exception("Переданные файлы неверных типов.");
