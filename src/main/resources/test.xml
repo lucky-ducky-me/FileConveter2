@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Firearms>
+    <Countries>
+        <Usa>
+            <Pistols>
+                <Pistol>
+                    <Name>M1911</Name>
+                    <Calibre>11.43</Calibre>
+                    <Magazine>7</Magazine>
+                </Pistol>
+            </Pistols>
+            <Rifles>
+                <Rifle>
+                    <Name>M16</Name>
+                    <Calibre>5.56</Calibre>
+                    <Magazine>20</Magazine>
+                </Rifle>
+            </Rifles>
+        </Usa>
+        <Russia>
+            <Pistols>
+                <Pistol>
+                    <Name>ПМ</Name>
+                    <Calibre>9.27</Calibre>
+                    <Magazine>8</Magazine>
+                </Pistol>
+                <Pistol>
+                    <Name>Testttttt</Name>
+                    <Calibre>0.0</Calibre>
+                    <Magazine>0</Magazine>
+                </Pistol>
+            </Pistols>
+            <Rifles>
+                <Rifle>
+                    <Name>АК-47</Name>
+                    <Calibre>7.62</Calibre>
+                    <Magazine>30</Magazine>
+                </Rifle>
+                <Rifle>
+                    <Name>Test</Name>
+                    <Calibre>0.0</Calibre>
+                    <Magazine>0</Magazine>
+                </Rifle>
+            </Rifles>
+        </Russia>
+    </Countries>
+</Firearms>

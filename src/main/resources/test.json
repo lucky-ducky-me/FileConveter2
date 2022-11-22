@@ -1,0 +1,44 @@
+{
+  "firearms": {
+    "rifles": [
+      {
+        "country": "Usa",
+        "name": "M16",
+        "calibre": "5.56",
+        "magazine": "20"
+      },
+      {
+        "country": "Russia",
+        "name": "АК-47",
+        "calibre": "7.62",
+        "magazine": "30"
+      },
+      {
+        "country": "Russia",
+        "name": "Test",
+        "calibre": "0.0",
+        "magazine": "0"
+      }
+    ],
+    "pistols": [
+      {
+        "country": "Usa",
+        "name": "M1911",
+        "calibre": "11.43",
+        "magazine": "7"
+      },
+      {
+        "country": "Russia",
+        "name": "ПМ",
+        "calibre": "9.27",
+        "magazine": "8"
+      },
+      {
+        "country": "Russia",
+        "name": "Testttttt",
+        "calibre": "0.0",
+        "magazine": "0"
+      }
+    ]
+  }
+}
